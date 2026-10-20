@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>多彩黔行 · 贵州文旅行程智能规划</title>
+<meta name="description" content="基于地理聚类与时间约束的贵州文旅行程智能规划工具">
+<meta name="theme-color" content="#0f2a3f">
+<link rel="manifest" href="/manifest.json">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+<div id="app">
+
+  <!-- ========== 顶部状态条 ========== -->
+  <header class="topbar">
+    <div class="brand" data-view="home">
+      <span class="brand-mark">黔</span>
+      <div class="brand-text">
+        <strong>多彩黔行</strong>
+        <small>贵州文旅行程智能规划</small>
+      </div>
+    </div>
+    <nav class="topnav">
+      <button class="nav-btn active" data-view="home">规划</button>
+      <button class="nav-btn" data-view="explore">景点库</button>
+      <button class="nav-btn" data-view="about">算法说明</button>
+    </nav>
+  </header>
+
+  <!-- ========== 首页：偏好表单 ========== -->
+  <main id="view-home" class="view active">
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="pill">贵州 · 9 市州 · 25 个精选目的地</span>
+        <h1>输入你的偏好，<br>30 秒生成可执行的贵州行程。</h1>
+        <p class="hero-sub">不是简单的"推荐列表"，而是把车程、游玩时长、用餐时间、门票与住宿成本一起解出来的排程方案 —— 每天几点出发、几点到、住哪儿，都给你算好。</p>
+        <div class="hero-stats">
+          <div><b>4</b><span>层规划算法</span></div>
+          <div><b>25</b><span>结构化景点</span></div>
+          <div><b>0</b><span>人工调参</span></div>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <svg viewBox="0 0 340 260" class="qian-svg">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#2f7d6f"/><stop offset="1" stop-color="#124b5e"/>
+            </linearGradient>
+          </defs>
+          <path d="M40 200 L95 120 L130 165 L175 85 L225 150 L290 95" fill="none" stroke="url(#g1)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="40" cy="200" r="6" fill="#e0a63d"/><circle cx="95" cy="120" r="5" fill="#fff"/>
+          <circle cx="130" cy="165" r="5" fill="#fff"/><circle cx="175" cy="85" r="7" fill="#e0a63d"/>
+          <circle cx="225" cy="150" r="5" fill="#fff"/><circle cx="290" cy="95" r="5" fill="#fff"/>
+          <text x="175" y="230" text-anchor="middle" fill="#7fa3ad" font-size="11">贵阳 → 黄果树 → 荔波 → 西江 → 镇远</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="panel form-panel">
+      <div class="panel-title">
+        <h2>行程条件</h2>
+        <span class="hint">全部为真实参数，直接影响算法输出</span>
+      </div>
+
+      <div class="field-grid">
+        <label class="field">
+          <span class="label">出行天数 <b id="daysVal">3</b> 天</span>
+          <input type="range" id="days" min="1" max="10" value="3" step="1">
+        </label>
+        <label class="field">
+          <span class="label">同行人数 <b id="peopleVal">2</b> 人</span>
+          <input type="range" id="people" min="1" max="10" value="2" step="1">
+        </label>
+        <label class="field">
+          <span class="label">人均预算 <b id="budgetVal">3000</b> 元</span>
+          <input type="range" id="budget" min="800" max="12000" value="3000" step="200">
+        </label>
+        <label class="field">
+          <span class="label">每日游玩上限 <b id="hoursVal">10</b> 小时</span>
+          <input type="range" id="hours" min="5" max="14" value="10" step="1">
+        </label>
+      </div>
+
+      <div class="field-block">
+        <span class="label">出行季节（影响季节性景点的取舍）</span>
+        <div class="chips" id="seasonChips">
+          <button class="chip" data-season="spring">春季 · 花海</button>
+          <button class="chip" data-season="summer">夏季 · 清凉</button>
+          <button class="chip active" data-season="autumn">秋季 · 金黄</button>
+          <button class="chip" data-season="winter">冬季 · 温泉古城</button>
+        </div>
+      </div>
+
+      <div class="field-block">
+        <span class="label">交通方式</span>
+        <div class="chips" id="modeChips">
+          <button class="chip active" data-mode="public">公共交通 · 班车/拼车</button>
+          <button class="chip" data-mode="selfdrive">自驾 · 租车</button>
+        </div>
+      </div>
+
+      <div class="field-block">
+        <span class="label">兴趣主题（可多选，最多 3 个）</span>
+        <div class="chips" id="themeChips"></div>
+      </div>
+
+      <div class="field-block">
+        <span class="label">细分偏好标签（可多选）</span>
+        <div class="chips" id="tagChips"></div>
+      </div>
+
+      <div class="form-actions">
+        <button id="planBtn" class="btn-primary">
+          <span class="btn-text">生成我的行程</span>
+          <span class="btn-loading" hidden><i class="spin"></i>正在规划…</span>
+        </button>
+        <button id="resetBtn" class="btn-ghost">重置条件</button>
+      </div>
+      <p class="form-note">规划耗时约 0.2 秒；数据来源见「算法说明」页。</p>
+    </section>
+  </main>
+
+  <!-- ========== 结果页 ========== -->
+  <main id="view-result" class="view">
+    <div class="result-head">
+      <button class="btn-back" id="backBtn">← 修改条件</button>
+      <div class="result-title">
+        <h1 id="resultTitle">你的贵州行程</h1>
+        <span class="result-meta" id="resultMeta"></span>
+      </div>
+      <div class="result-actions">
+        <button class="btn-ghost" id="exportBtn">导出图片</button>
+        <button class="btn-ghost" id="shareBtn">生成分享链接</button>
+      </div>
+    </div>
+
+    <div id="budgetBar" class="budget-bar"></div>
+
+    <div id="daysContainer" class="days"></div>
+
+    <div class="result-foot">
+      <div class="foot-note">
+        <strong>提示</strong>：门票为参考价，以景区公示为准；民宿为合作推荐，非实际预订。
+      </div>
+    </div>
+  </main>
+
+  <!-- ========== 景点库 ========== -->
+  <main id="view-explore" class="view">
+    <div class="result-head">
+      <div class="result-title"><h1>景点库</h1><span class="result-meta">结构化数据，算法据此建模</span></div>
+      <div class="filter-row" id="exploreFilters"></div>
+    </div>
+    <div id="spotGrid" class="spot-grid"></div>
+  </main>
+
+  <!-- ========== 算法说明 ========== -->
+  <main id="view-about" class="view">
+    <div class="result-head"><div class="result-title"><h1>算法说明</h1><span class="result-meta">本作品的技术内核与数据来源</span></div></div>
+    <div class="about-grid">
+      <article class="card">
+        <h3>四层规划流水线</h3>
+        <ol class="steps">
+          <li><b>L1 候选集评分</b>　偏好标签命中 ×3 + 景区等级权重 + 主题命中 ×4 + 季节适配 ±　− 门票惩罚</li>
+          <li><b>L2 空间切段</b>　经纬度 Morton 编码排序，把候选切成 D 段（每天一段），兼顾"每日景点时长预算"</li>
+          <li><b>L3 日路线优化</b>　贪心插入（边际时间成本最小） + 2-opt 消除交叉，最小化当日车程</li>
+          <li><b>L4 时间轴排布</b>　按 8:30–21:00 排入景点、车程、午餐、晚餐，超窗则剔除末位景点</li>
+        </ol>
+      </article>
+      <article class="card">
+        <h3>关键业务参数</h3>
+        <table class="mini-table">
+          <tr><td>自驾均速</td><td>55 km/h（山区县道）</td></tr>
+          <tr><td>公共交通</td><td>38 km/h + 25 min 候车</td></tr>
+          <tr><td>午餐 / 晚餐</td><td>45 / 65 元 · 各 75 分钟</td></tr>
+          <tr><td>门票</td><td>逐景点真实参考价</td></tr>
+          <tr><td>住宿</td><td>按预算档位就近匹配民宿</td></tr>
+        </table>
+      </article>
+      <article class="card">
+        <h3>数据来源</h3>
+        <p>贵州省 A 级景区公开名录、贵州省文化和旅游厅官网、各市州政府公开资料整理；坐标与游玩时长为公开资料估算，门票为参考价，实际以景区公示为准。</p>
+        <p class="muted">共 25 个景点 / 10 家民宿 / 10 类地方美食，覆盖 9 个市州。</p>
+      </article>
+      <article class="card">
+        <h3>为什么不用大模型直接生成行程？</h3>
+        <p>大模型给出的行程常有"时间不够""两地相隔 4 小时却排在同一天"的问题——它不理解地理约束。本作品把行程变成一个<b>带时间窗的选址-路径问题</b>，用确定性算法求解，每一步都可复算、可解释、可审计。</p>
+      </article>
+    </div>
+  </main>
+
+  <!-- ========== 分享弹窗 ========== -->
+  <div id="toast" class="toast" hidden></div>
+  <div id="modal" class="modal" hidden>
+    <div class="modal-card">
+      <h3 id="modalTitle">标题</h3>
+      <p id="modalBody"></p>
+      <div class="modal-actions">
+        <button class="btn-primary" id="modalCopy">复制链接</button>
+        <button class="btn-ghost" id="modalClose">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.__SHARE_ID__ = {{ (share_id or '')|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

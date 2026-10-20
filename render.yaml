@@ -1,0 +1,14 @@
+# Render.com 一键部署配置（免费套餐可用）
+services:
+  - type: web
+    name: duocai-qianxing
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: QX_DB
+        value: /data/app.db
+    disk:
+      name: qx-data
+      mountPath: /data
+      sizeGB: 1

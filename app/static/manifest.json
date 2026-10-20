@@ -1,0 +1,9 @@
+{
+  "name": "多彩黔行 · 贵州文旅行程智能规划",
+  "short_name": "多彩黔行",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f8f7",
+  "theme_color": "#0f2a3f",
+  "icons": [{"src": "/static/img/icon-192.png", "sizes": "192x192", "type": "image/png"}]
+}
