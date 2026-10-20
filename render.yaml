@@ -1,11 +1,14 @@
-# Render.com 一键部署配置（免费套餐）
-# 注：免费套餐不支持持久磁盘，分享的行程在重启后会清空，属预期行为
+# Render.com 一键部署配置（免费套餐 · Python 原生运行时，无需绑卡）
 services:
   - type: web
     name: duocai-qianxing
-    runtime: docker
+    runtime: python
     plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -c gunicorn.conf.py wsgi:application
     healthCheckPath: /api/health
     envVars:
       - key: QX_DB
         value: /tmp/app.db
+      - key: PYTHON_VERSION
+        value: "3.11.9"
