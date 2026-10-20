@@ -1,4 +1,5 @@
-# Render.com 一键部署配置（免费套餐可用）
+# Render.com 一键部署配置（免费套餐）
+# 注：免费套餐不支持持久磁盘，分享的行程在重启后会清空，属预期行为
 services:
   - type: web
     name: duocai-qianxing
@@ -7,8 +8,4 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: QX_DB
-        value: /data/app.db
-    disk:
-      name: qx-data
-      mountPath: /data
-      sizeGB: 1
+        value: /tmp/app.db
